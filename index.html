@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Snap Streak Restore</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+<style>
+  :root{
+    --bg:#0b0b0c; --panel:#151517; --panel2:#1d1d20; --line:#2a2a2e;
+    --text:#f4f4f5; --muted:#9b9ba3; --dim:#6b6b73;
+    --yellow:#fffc00; --yellow-ink:#111; --red:#ff5a5f; --green:#3ddc84; --orange:#ffa53d;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif}
+  button,input,select,textarea{font:inherit;color:inherit}
+  a{color:var(--yellow)}
+  .wrap{max-width:980px;margin:0 auto;padding:28px 18px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:12px;background:var(--yellow);display:grid;place-items:center;font-size:24px}
+  h1{font-size:22px;margin:0;letter-spacing:-.01em}
+  .tag{color:var(--muted);font-size:13px}
+  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+  .stat b{color:var(--text)}
+
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+  @media (max-width:820px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+  .card h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 14px;display:flex;justify-content:space-between;align-items:center}
+  label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px}
+  label:first-of-type{margin-top:0}
+  input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;transition:border-color .15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--yellow)}
+  input.bad{border-color:var(--red)}
+  .hint{font-size:12px;color:var(--dim);margin-top:4px}
+  .err{font-size:12px;color:var(--red);margin-top:4px;min-height:0}
+  .btn{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px 14px;cursor:pointer;transition:filter .15s,transform .05s;white-space:nowrap}
+  .btn:hover{filter:brightness(1.2)}
+  .btn:active{transform:translateY(1px)}
+  .btn.y{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow);font-weight:600}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 10px;font-size:13px}
+  .btn.danger{color:var(--red)}
+  .row{display:flex;gap:8px;align-items:center}
+  .row>*{flex:1}
+  .row>.btn{flex:0 0 auto}
+  .saved{font-size:12px;color:var(--green);opacity:0;transition:opacity .3s;margin-left:8px}
+  .saved.on{opacity:1}
+
+  .toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .toolbar input{flex:1;min-width:160px}
+  .toolbar select{width:auto}
+
+  .list{display:grid;gap:10px}
+  .item{display:flex;align-items:stretch;gap:8px}
+  .go{flex:1;display:flex;align-items:center;gap:12px;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s;min-width:0}
+  .go:hover{border-color:var(--yellow);background:#232326}
+  .go.cool{opacity:.75}
+  .avatar{flex:0 0 40px;height:40px;border-radius:50%;background:var(--yellow);color:var(--yellow-ink);display:grid;place-items:center;font-weight:700;font-size:16px}
+  .avatar.group{background:#7c5cff;color:#fff}
+  .meta{min-width:0;flex:1}
+  .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sub{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pill{font-size:11.5px;padding:3px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .pill.cool{color:var(--orange);border-color:#5a3d1a}
+  .pill.ok{color:var(--green);border-color:#1f4a33}
+  .side{display:flex;flex-direction:column;gap:6px}
+  .icon{width:38px;height:100%;min-height:30px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;display:grid;place-items:center;font-size:15px}
+  .icon:hover{filter:brightness(1.3)}
+  .icon.pin.on{color:var(--yellow)}
+  .empty{color:var(--muted);text-align:center;padding:30px 10px;border:1px dashed var(--line);border-radius:12px}
+
+  .add{display:grid;grid-template-columns:120px 1fr 1fr auto;gap:8px;margin-top:14px}
+  @media (max-width:600px){.add{grid-template-columns:1fr 1fr}.add .btn{grid-column:span 2}}
+
+  details{margin-top:14px}
+  summary{cursor:pointer;color:var(--muted);font-size:13px}
+  .history{max-height:280px;overflow:auto;font-size:13px}
+  .history div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .history span:last-child{color:var(--dim);white-space:nowrap}
+
+  .safe{font-size:13px;color:var(--muted);line-height:1.6}
+  .safe b{color:var(--text)}
+  .safe ul{padding-left:18px;margin:6px 0}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal-bg.on{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:420px;width:100%}
+  .modal h3{margin:0 0 8px;font-size:18px}
+  .modal p{margin:0 0 16px;color:var(--muted)}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--text);color:#000;padding:10px 16px;border-radius:999px;font-weight:500;opacity:0;transition:.25s;pointer-events:none;z-index:20}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  [hidden]{display:none!important}
+  :root[data-theme=light]{--bg:#f4f4f6;--panel:#fff;--panel2:#f0f0f3;--line:#e1e1e6;--text:#141416;--muted:#5f5f68;--dim:#8a8a93}
+  :root[data-theme=light] .go:hover{background:#e9e9ee}
+  :root[data-theme=light] .toast{background:#141416;color:#fff}
+  body.compact .go{padding:8px 12px}
+  body.compact .avatar{flex-basis:30px;height:30px;font-size:13px}
+  body.compact .list{gap:6px}
+  body.compact .sub{display:none}
+  .set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .set-row:last-child{border-bottom:0}
+  .set-row .t{font-size:14px}
+  .set-row .d{font-size:12px;color:var(--dim)}
+  .set-row select,.set-row input[type=number]{width:auto;min-width:120px}
+  .set-row input[type=color]{width:46px;height:34px;padding:2px}
+  .set-group{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:16px 0 2px}
+  .switch{position:relative;width:42px;height:24px;flex:0 0 42px}
+  .switch input{opacity:0;width:0;height:0;position:absolute}
+  .switch span{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.2s;cursor:pointer}
+  .switch span::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+  .switch input:checked+span{background:var(--yellow)}
+  .switch input:checked+span::after{transform:translateX(18px);background:var(--yellow-ink)}
+  #setModal .modal{max-width:520px;max-height:88vh;overflow:auto}
+  kbd{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">🔥</div>
+      <div>
+        <h1>Snap Streak Restore</h1>
+        <div class="tag" id="tagline"></div>
+      </div>
+    </div>
+    <div class="row" style="flex:0 0 auto">
+      <div class="stats" id="stats"></div>
+      <button class="btn" id="setBtn" title="Settings">⚙ Settings</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div style="display:grid;gap:18px">
+      <section class="card">
+        <h2>Your details <span class="saved" id="savedTag">Saved ✓</span></h2>
+        <label for="me_user">Your Snapchat username</label>
+        <input id="me_user" autocomplete="off" spellcheck="false" placeholder="e.g. viktor_123">
+        <div class="err" id="err_user"></div>
+        <label for="me_email">Email on your Snapchat account</label>
+        <input id="me_email" type="email" autocomplete="off" spellcheck="false" placeholder="you@gmail.com">
+        <div class="err" id="err_email"></div>
+        <div class="hint">Snapchat's reply goes here, so check the spelling.</div>
+        <label for="me_phone">Mobile number</label>
+        <input id="me_phone" autocomplete="off" placeholder="+372 5123 4567">
+        <div class="err" id="err_phone"></div>
+        <div class="hint">Include your country code (Estonia is +372).</div>
+      </section>
+
+      <section class="card safe" id="safetyCard">
+        <h2>Ban-safe by design</h2>
+        <ul>
+          <li><b>Nothing runs on your account.</b> No login, no password, no bots. It only opens Snapchat's own support form.</li>
+          <li><b>You submit every ticket yourself</b> on Snapchat's page. Nothing is sent automatically.</li>
+          <li><b>2-hour cooldown per streak.</b> Snapchat asks you to wait 2 hours before sending another ticket, so a name stays locked until that time has passed.</li>
+          <li>Your data stays in this browser on your PC. Back it up with <b>Export</b> below.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Backup</h2>
+        <div class="row">
+          <button class="btn" id="exportBtn">Export</button>
+          <button class="btn" id="importBtn">Import</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
+        <div class="hint" style="margin-top:8px">Saves your details, list and history to a file, for a new browser or PC.</div>
+      </section>
+    </div>
+
+    <!-- RIGHT -->
+    <div style="display:grid;gap:18px">
+      <section class="card">
+        <h2>Streaks <span style="text-transform:none;letter-spacing:0;font-weight:400"><kbd>/</kbd> to search</span></h2>
+        <div class="toolbar">
+          <input id="search" placeholder="Search…" autocomplete="off">
+          <select id="sort">
+            <option value="smart">Pinned first</option>
+            <option value="recent">Last restored</option>
+            <option value="az">A–Z</option>
+            <option value="most">Most restored</option>
+          </select>
+        </div>
+        <div class="list" id="list"></div>
+
+        <div class="add">
+          <select id="add_type">
+            <option value="friend">Friend</option>
+            <option value="group">Group</option>
+          </select>
+          <input id="add_name" placeholder="Their Snapchat username" autocomplete="off" spellcheck="false">
+          <input id="add_label" placeholder="Nickname (optional)" autocomplete="off">
+          <button class="btn y" id="addBtn">Add</button>
+        </div>
+        <div class="err" id="err_add"></div>
+
+        <details>
+          <summary>Add many at once</summary>
+          <textarea id="bulk" rows="4" placeholder="One username per line. Add 'group:' in front for group chats, e.g.&#10;john_doe&#10;anna.k&#10;group:Squad 🔥" style="margin-top:8px"></textarea>
+          <div style="margin-top:8px;text-align:right"><button class="btn" id="bulkBtn">Add all</button></div>
+        </details>
+      </section>
+
+      <section class="card" id="historyCard">
+        <h2>History <button class="btn sm ghost danger" id="clearHist">Clear</button></h2>
+        <div class="history" id="history"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="m_title"></h3>
+    <p id="m_body"></p>
+    <div class="actions" id="m_actions"></div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="setModal">
+  <div class="modal">
+    <h3>Settings</h3>
+
+    <div class="set-group">Opening the form</div>
+    <div class="set-row"><div><div class="t">Open form in</div><div class="d">Where Snapchat's form opens when you tap a name</div></div>
+      <select id="s_openMode"><option value="tab">New tab</option><option value="popup">Popup window</option><option value="same">This tab</option></select></div>
+    <div class="set-row"><div><div class="t">Ask “Did you submit it?”</div><div class="d">Off: every opened form is logged as sent right away</div></div>
+      <label class="switch"><input type="checkbox" id="s_askSubmitted"><span></span></label></div>
+    <div class="set-row"><div><div class="t">Confirm before opening</div><div class="d">Stops a wrong tap from opening a form</div></div>
+      <label class="switch"><input type="checkbox" id="s_confirmOpen"><span></span></label></div>
+    <div class="set-row"><div><div class="t">Enter in search opens first result</div><div class="d">Type a name, press Enter, done</div></div>
+      <label class="switch"><input type="checkbox" id="s_enterOpensFirst"><span></span></label></div>
+
+    <div class="set-group">Cooldown</div>
+    <div class="set-row"><div><div class="t">Cooldown lock</div><div class="d">Snapchat asks you to wait 2 hours between tickets. Leaving this on is safest.</div></div>
+      <label class="switch"><input type="checkbox" id="s_cooldownOn"><span></span></label></div>
+    <div class="set-row"><div><div class="t">Cooldown length (hours)</div></div>
+      <input type="number" id="s_cooldownHours" min="1" max="48" step="0.5"></div>
+
+    <div class="set-group">Look</div>
+    <div class="set-row"><div class="t">Theme</div>
+      <select id="s_theme"><option value="dark">Dark</option><option value="light">Light</option><option value="auto">Match system</option></select></div>
+    <div class="set-row"><div class="t">Accent colour</div>
+      <input type="color" id="s_accent"></div>
+    <div class="set-row"><div><div class="t">Compact list</div><div class="d">Smaller rows, fits more names</div></div>
+      <label class="switch"><input type="checkbox" id="s_compact"><span></span></label></div>
+    <div class="set-row"><div class="t">Show stats</div>
+      <label class="switch"><input type="checkbox" id="s_showStats"><span></span></label></div>
+    <div class="set-row"><div class="t">Show “Ban-safe” info box</div>
+      <label class="switch"><input type="checkbox" id="s_showSafety"><span></span></label></div>
+    <div class="set-row"><div class="t">Show history</div>
+      <label class="switch"><input type="checkbox" id="s_showHistory"><span></span></label></div>
+
+    <div class="set-group">Data</div>
+    <div class="set-row"><div class="t">Keep history entries</div>
+      <select id="s_historyLimit"><option value="50">Last 50</option><option value="100">Last 100</option><option value="300">Last 300</option><option value="1000">Last 1000</option></select></div>
+    <div class="set-row"><div><div class="t">Delete all data</div><div class="d">Details, streaks, history and settings</div></div>
+      <button class="btn danger" id="s_wipe">Delete…</button></div>
+
+    <div class="actions" style="margin-top:16px">
+      <button class="btn ghost" id="s_reset" style="margin-right:auto">Reset settings</button>
+      <button class="btn y" id="s_close">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3>Edit</h3>
+    <label>Type</label>
+    <select id="e_type"><option value="friend">Friend</option><option value="group">Group</option></select>
+    <label id="e_name_label">Username</label>
+    <input id="e_name" spellcheck="false">
+    <label>Nickname</label>
+    <input id="e_label">
+    <div class="err" id="err_edit"></div>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn danger ghost" id="e_del" style="margin-right:auto">Delete</button>
+      <button class="btn" id="e_cancel">Cancel</button>
+      <button class="btn y" id="e_save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Config: real field IDs of Snapchat's "Snapstreaks Restore" form (ticket_form_id 149423) ---------- */
+const FORM = {
+  base: "https://help.snapchat.com/hc/en-us/requests/new",
+  formId: "149423",
+  f: {
+    requesterEmail: "anonymous_requester_email",
+    username: "24281229",
+    email:    "24335325",
+    phone:    "24369716",
+    chatType: "20471844629908",
+    friend:   "24369736",
+    group:    "36936522119316",
+  },
+  chat: { friend: "snapstreak_restoration_individual", group: "snapstreak_restoration_group" }
+};
+const KEY = "snapStreakRestore.v2"; // same key as before, so saved data carries over
+
+/* ---------- State ---------- */
+const DEFAULT_SETTINGS = {
+  openMode: "tab",        // tab | popup | same
+  askSubmitted: true,
+  confirmOpen: false,
+  cooldownOn: true,
+  cooldownHours: 2,
+  theme: "dark",          // dark | light | auto
+  accent: "#fffc00",
+  compact: false,
+  showSafety: true,
+  showHistory: true,
+  showStats: true,
+  enterOpensFirst: true,
+  historyLimit: 300,
+};
+const blank = () => ({ me:{user:"",email:"",phone:""}, people:[], history:[], sort:"smart", settings:{...DEFAULT_SETTINGS} });
+let S = blank();
+function hydrate(d){
+  const b = blank();
+  S = Object.assign(b, d||{});
+  S.settings = Object.assign({...DEFAULT_SETTINGS}, (d&&d.settings)||{});
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if (raw) hydrate(JSON.parse(raw));
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save, check browser storage"); } }
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const normUser = s => s.trim().replace(/^@+/,"").replace(/\s+/g,"").toLowerCase();
+const validUser = s => /^[a-z][a-z0-9._-]{1,14}$/.test(s);
+const validEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+const normPhone = s => { s = s.trim(); if(!s) return ""; const plus = s.startsWith("+") || s.startsWith("00"); const d = s.replace(/\D/g,"").replace(/^00/,""); return (plus?"+":"") + d; };
+const validPhone = s => !s || /^\+\d{7,15}$/.test(s);
+function ago(t){
+  const s = Math.round((Date.now()-t)/1000);
+  if (s<60) return "just now";
+  const m = Math.round(s/60); if (m<60) return m+" min ago";
+  const h = Math.round(m/60); if (h<24) return h+" h ago";
+  const d = Math.round(h/24); if (d<30) return d+" d ago";
+  return new Date(t).toLocaleDateString();
+}
+function left(ms){
+  const m = Math.ceil(ms/60000);
+  return m>=60 ? Math.floor(m/60)+"h "+(m%60)+"m" : m+"m";
+}
+let toastT;
+function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("on"),2400); }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const display = p => p.label || p.name;
+
+/* ---------- Profile ---------- */
+function loadMe(){ $("me_user").value=S.me.user; $("me_email").value=S.me.email; $("me_phone").value=S.me.phone; }
+function checkMe(show){
+  const u=normUser($("me_user").value), e=$("me_email").value.trim(), p=normPhone($("me_phone").value);
+  const errs = {
+    user: !u ? "Required" : !validUser(u) ? "Usernames are 3–15 characters: letters, numbers, . _ -" : "",
+    email: !e ? "Required" : !validEmail(e) ? "That email doesn't look right" : "",
+    phone: !validPhone(p) ? "Start with + and your country code, e.g. +372…" : ""
+  };
+  if (show) for (const k in errs){ $("err_"+k).textContent=errs[k]; $("me_"+k).classList.toggle("bad",!!errs[k]); }
+  return !errs.user && !errs.email && !errs.phone;
+}
+let savedT;
+function saveMe(){
+  S.me.user = normUser($("me_user").value);
+  S.me.email = $("me_email").value.trim();
+  S.me.phone = normPhone($("me_phone").value);
+  save(); checkMe(true);
+  $("savedTag").classList.add("on"); clearTimeout(savedT); savedT=setTimeout(()=>$("savedTag").classList.remove("on"),1200);
+}
+["me_user","me_email","me_phone"].forEach(id=>{
+  $(id).addEventListener("input", ()=>{ clearTimeout($(id)._t); $(id)._t=setTimeout(saveMe,400); });
+  $(id).addEventListener("blur", ()=>{ saveMe(); loadMe(); });
+});
+
+/* ---------- People ---------- */
+function addPerson(type, name, label){
+  name = type==="friend" ? normUser(name) : name.trim();
+  if (!name) return "Enter a username";
+  if (type==="friend" && !validUser(name)) return "\""+name+"\" isn't a valid Snapchat username";
+  if (S.people.some(p=>p.type===type && p.name.toLowerCase()===name.toLowerCase())) return "\""+name+"\" is already on your list";
+  S.people.push({ id:uid(), type, name, label:(label||"").trim(), pinned:false, count:0, last:0, added:Date.now() });
+  return "";
+}
+$("add_type").onchange = () => { $("add_name").placeholder = $("add_type").value==="group" ? "Group chat name (exactly as in Snapchat)" : "Their Snapchat username"; };
+$("addBtn").onclick = () => {
+  const err = addPerson($("add_type").value, $("add_name").value, $("add_label").value);
+  $("err_add").textContent = err;
+  if (!err){ $("add_name").value=""; $("add_label").value=""; save(); render(); toast("Added"); $("add_name").focus(); }
+};
+["add_name","add_label"].forEach(id=>$(id).addEventListener("keydown",e=>{ if(e.key==="Enter") $("addBtn").click(); }));
+$("bulkBtn").onclick = () => {
+  const lines = $("bulk").value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  let ok=0, bad=[];
+  for (const l of lines){
+    const g = /^group:\s*/i.test(l);
+    const err = addPerson(g?"group":"friend", l.replace(/^group:\s*/i,""), "");
+    err ? bad.push(l) : ok++;
+  }
+  save(); render();
+  $("err_add").textContent = bad.length ? "Skipped (invalid or duplicate): "+bad.join(", ") : "";
+  if (ok) { $("bulk").value = bad.join("\n"); toast("Added "+ok); }
+};
+
+/* ---------- Restore ---------- */
+function buildUrl(p){
+  const q = new URLSearchParams();
+  q.set("co","true");
+  q.set("ticket_form_id", FORM.formId);
+  q.set("tf_"+FORM.f.requesterEmail, S.me.email);
+  q.set("tf_"+FORM.f.username, S.me.user);
+  q.set("tf_"+FORM.f.email, S.me.email);
+  if (S.me.phone) q.set("tf_"+FORM.f.phone, S.me.phone);
+  q.set("tf_"+FORM.f.chatType, FORM.chat[p.type]);
+  q.set("tf_"+(p.type==="group"?FORM.f.group:FORM.f.friend), p.name);
+  return FORM.base + "?" + q.toString();
+}
+function cooldownLeft(p){
+  const lastSubmit = S.history.filter(h=>h.pid===p.id && h.status==="submitted").reduce((a,h)=>Math.max(a,h.t),0);
+  if (!S.settings.cooldownOn) return 0;
+  return Math.max(0, lastSubmit + S.settings.cooldownHours*3600000 - Date.now());
+}
+function modal(title, body, actions){
+  $("m_title").textContent = title; $("m_body").textContent = body;
+  const box = $("m_actions"); box.innerHTML = "";
+  actions.forEach(a=>{ const b=document.createElement("button"); b.className="btn "+(a.cls||""); b.textContent=a.text; b.onclick=()=>{ $("modal").classList.remove("on"); a.fn && a.fn(); }; box.append(b); });
+  $("modal").classList.add("on");
+}
+function restore(p){
+  if (!checkMe(true)) { toast("Fill in your details first"); $("me_user").focus(); return; }
+  if (S.settings.confirmOpen){
+    return modal("Restore "+display(p)+"?", (p.type==="group"?"Group chat: ":"Friend: @")+p.name, [
+      {text:"Cancel", cls:"ghost"},
+      {text:"Open form", cls:"y", fn:()=>restoreChecked(p)}
+    ]);
+  }
+  restoreChecked(p);
+}
+function restoreChecked(p){
+  const cd = cooldownLeft(p);
+  if (cd > 0){
+    modal("Wait "+left(cd), "You sent a ticket for "+display(p)+" less than "+S.settings.cooldownHours+" hour"+(S.settings.cooldownHours==1?"":"s")+" ago. Snapchat asks you to wait for their reply before sending another ticket. Sending duplicates can slow things down.", [
+      {text:"OK, I'll wait", cls:"y"},
+      {text:"Open anyway", cls:"ghost", fn:()=>openForm(p)}
+    ]);
+    return;
+  }
+  openForm(p);
+}
+let popup=null, popupWatch=null;
+function openForm(p){
+  const T = S.settings;
+  const url = buildUrl(p);
+  if (T.openMode === "popup"){
+    const w=520, h=Math.min(820, screen.availHeight-60);
+    const x=Math.round((window.screenX||0) + ((window.outerWidth||screen.availWidth)-w)/2);
+    const y=Math.round((window.screenY||0) + 30);
+    if (popup && !popup.closed) popup.close();
+    clearInterval(popupWatch);
+    popup = window.open(url, "snapRestore", `popup=yes,width=${w},height=${h},left=${x},top=${y}`);
+    if (popup){
+      if (!T.askSubmitted) return logSubmit(p);
+      toast("Press Submit in the window, then close it.");
+      popupWatch = setInterval(()=>{
+        if (popup.closed){ clearInterval(popupWatch); popup=null; askSubmitted(p, "Did the ticket for "+display(p)+" go through?"); }
+      }, 500);
+      return;
+    }
+    toast("Popup blocked, opened a tab instead");
+  }
+  window.open(url, T.openMode==="same" ? "_self" : "_blank");
+  if (T.openMode==="same") { if (!T.askSubmitted) logSubmit(p, true); else S.pendingAsk = p.id, save(); return; }
+  if (!T.askSubmitted) return logSubmit(p);
+  setTimeout(()=>askSubmitted(p, "The form for "+display(p)+" opened in a new tab. Press Submit there, then confirm here so the cooldown and history stay accurate."), 400);
+}
+function logSubmit(p, quiet){
+  p.count = (p.count||0)+1; p.last = Date.now();
+  S.history.unshift({ pid:p.id, name:display(p), type:p.type, t:Date.now(), status:"submitted" });
+  S.history = S.history.slice(0, S.settings.historyLimit);
+  save(); render();
+  if (!quiet) toast(S.settings.askSubmitted ? "Logged. Check "+S.me.email+" for Snapchat's reply." : "Logged "+display(p));
+}
+function askSubmitted(p, text){
+  modal("Did you submit it?", text, [
+    {text:"Not yet", cls:"ghost"},
+    {text:"Yes, submitted", cls:"y", fn:()=>logSubmit(p)}
+  ]);
+}
+
+/* ---------- Edit ---------- */
+let editing=null;
+function openEdit(p){
+  editing=p; $("e_type").value=p.type; $("e_name").value=p.name; $("e_label").value=p.label||""; $("err_edit").textContent="";
+  $("e_name_label").textContent = p.type==="group" ? "Group chat name" : "Username";
+  $("editModal").classList.add("on"); $("e_name").focus();
+}
+$("e_type").onchange=()=>{ $("e_name_label").textContent = $("e_type").value==="group" ? "Group chat name" : "Username"; };
+$("e_cancel").onclick=()=>$("editModal").classList.remove("on");
+$("e_save").onclick=()=>{
+  const type=$("e_type").value; let name=$("e_name").value;
+  name = type==="friend" ? normUser(name) : name.trim();
+  if (!name) return $("err_edit").textContent="Required";
+  if (type==="friend" && !validUser(name)) return $("err_edit").textContent="Not a valid Snapchat username";
+  if (S.people.some(x=>x!==editing && x.type===type && x.name.toLowerCase()===name.toLowerCase())) return $("err_edit").textContent="Already on your list";
+  Object.assign(editing,{type,name,label:$("e_label").value.trim()});
+  save(); render(); $("editModal").classList.remove("on"); toast("Saved");
+};
+$("e_del").onclick=()=>{
+  const p=editing; $("editModal").classList.remove("on");
+  modal("Delete "+display(p)+"?", "Removes them from your list. Their history entries stay.", [
+    {text:"Cancel", cls:"ghost"},
+    {text:"Delete", cls:"danger", fn:()=>{ S.people=S.people.filter(x=>x!==p); save(); render(); toast("Deleted"); }}
+  ]);
+};
+
+/* ---------- Render ---------- */
+function sorted(){
+  const q = $("search").value.trim().toLowerCase();
+  let arr = S.people.filter(p=>!q || p.name.toLowerCase().includes(q) || (p.label||"").toLowerCase().includes(q));
+  const s = S.sort;
+  arr.sort((a,b)=>{
+    if (s==="smart" && a.pinned!==b.pinned) return a.pinned? -1 : 1;
+    if (s==="recent" || s==="smart") { if ((b.last||0)!==(a.last||0) && s==="recent") return (b.last||0)-(a.last||0); }
+    if (s==="most" && (b.count||0)!==(a.count||0)) return (b.count||0)-(a.count||0);
+    return display(a).localeCompare(display(b));
+  });
+  return arr;
+}
+function render(){
+  const list = $("list"); list.innerHTML="";
+  const arr = sorted();
+  if (!S.people.length){
+    list.innerHTML = '<div class="empty">No streaks yet. Add a friend\'s username below 👇</div>';
+  } else if (!arr.length){
+    list.innerHTML = '<div class="empty">Nothing matches your search.</div>';
+  }
+  for (const p of arr){
+    const cd = cooldownLeft(p);
+    const item = document.createElement("div"); item.className="item";
+    const initial = (display(p).match(/[\p{L}\p{N}]/u)||["?"])[0].toUpperCase();
+    const sub = [
+      p.label ? (p.type==="group"?"Group: ":"@")+p.name : (p.type==="group"?"Group chat":"Friend"),
+      p.count ? "restored "+p.count+"×" : "",
+      p.last ? ago(p.last) : ""
+    ].filter(Boolean).join(" · ");
+    item.innerHTML = `
+      <button class="go ${cd?'cool':''}" title="Open the prefilled form for ${esc(display(p))}">
+        <div class="avatar ${p.type==='group'?'group':''}">${p.type==='group'?'👥':esc(initial)}</div>
+        <div class="meta"><div class="name">${p.pinned?'📌 ':''}${esc(display(p))}</div><div class="sub">${esc(sub)}</div></div>
+        ${cd ? `<span class="pill cool">⏳ ${left(cd)}</span>` : (p.last ? `<span class="pill ok">Ready</span>` : '')}
+      </button>
+      <div class="side">
+        <button class="icon pin ${p.pinned?'on':''}" title="${p.pinned?'Unpin':'Pin to top'}">★</button>
+        <button class="icon" title="Edit">✎</button>
+      </div>`;
+    const [go, pin, edit] = item.querySelectorAll("button");
+    go.onclick = () => restore(p);
+    pin.onclick = () => { p.pinned=!p.pinned; save(); render(); };
+    edit.onclick = () => openEdit(p);
+    list.append(item);
+  }
+  // history
+  const h = $("history");
+  h.innerHTML = S.history.length ? S.history.map(x=>`<div><span>${x.type==='group'?'👥':'🔥'} ${esc(x.name)}</span><span title="${new Date(x.t).toLocaleString()}">${ago(x.t)}</span></div>`).join("") : '<div style="color:var(--dim);border:0">Nothing yet.</div>';
+  // stats
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayN = S.history.filter(x=>x.t>=today.getTime()).length;
+  $("stats").innerHTML = `<span class="stat"><b>${S.people.length}</b> streaks</span><span class="stat"><b>${S.history.length}</b> requests</span><span class="stat"><b>${todayN}</b> today</span>`;
+}
+$("search").addEventListener("input", render);
+$("sort").onchange = () => { S.sort=$("sort").value; save(); render(); };
+$("clearHist").onclick = () => modal("Clear history?", "This also resets the cooldown timers.", [
+  {text:"Cancel", cls:"ghost"},
+  {text:"Clear", cls:"danger", fn:()=>{ S.history=[]; S.people.forEach(p=>{p.count=0;p.last=0;}); save(); render(); }}
+]);
+
+/* ---------- Backup ---------- */
+$("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const a = document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download = "snap-streak-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("importBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try{
+    const d = JSON.parse(await f.text());
+    if (!d || !Array.isArray(d.people)) throw 0;
+    hydrate(d); save(); loadMe(); $("sort").value=S.sort; applySettings(); render(); toast("Backup restored");
+  }catch(_){ toast("That file isn't a valid backup"); }
+  e.target.value="";
+};
+
+/* ---------- Keys ---------- */
+document.addEventListener("keydown", e=>{
+  if (e.key==="/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){ e.preventDefault(); $("search").focus(); }
+  if (e.key==="Escape"){ ["modal","editModal","setModal"].forEach(id=>$(id).classList.remove("on")); }
+  if (e.key==="Enter" && S.settings.enterOpensFirst && document.activeElement===$("search")){ const first=$("list").querySelector(".go"); first && first.click(); }
+});
+["modal","editModal","setModal"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) $(id).classList.remove("on"); }));
+
+/* ---------- Settings ---------- */
+const SET_FIELDS = ["openMode","askSubmitted","confirmOpen","cooldownOn","cooldownHours","theme","accent","compact","showSafety","showHistory","showStats","enterOpensFirst","historyLimit"];
+function inkFor(hex){ const n=parseInt(hex.slice(1),16), r=n>>16, g=n>>8&255, b=n&255; return (r*299+g*587+b*114)/1000 > 140 ? "#111" : "#fff"; }
+function applySettings(){
+  const T=S.settings, root=document.documentElement;
+  const light = T.theme==="light" || (T.theme==="auto" && matchMedia("(prefers-color-scheme: light)").matches);
+  root.dataset.theme = light ? "light" : "dark";
+  root.style.setProperty("--yellow", T.accent);
+  root.style.setProperty("--yellow-ink", inkFor(T.accent));
+  document.body.classList.toggle("compact", T.compact);
+  $("safetyCard").hidden = !T.showSafety;
+  $("historyCard").hidden = !T.showHistory;
+  $("stats").hidden = !T.showStats;
+  $("tagline").textContent = T.openMode==="popup" ? "Tap a name, press Submit in the popup, close it. Done." : "Tap a name. The official form opens already filled in. You press Submit.";
+}
+function fillSettings(){
+  const T=S.settings;
+  for (const k of SET_FIELDS){ const el=$("s_"+k); if (el.type==="checkbox") el.checked=!!T[k]; else el.value=T[k]; }
+  $("s_cooldownHours").disabled = !T.cooldownOn;
+}
+$("setBtn").onclick = () => { fillSettings(); $("setModal").classList.add("on"); };
+$("s_close").onclick = () => $("setModal").classList.remove("on");
+for (const k of SET_FIELDS){
+  $("s_"+k).addEventListener("change", e=>{
+    const el=e.target; let v = el.type==="checkbox" ? el.checked : el.value;
+    if (k==="cooldownHours") v = Math.min(48, Math.max(1, parseFloat(v)||2));
+    if (k==="historyLimit") { v = parseInt(v)||300; S.history = S.history.slice(0,v); }
+    S.settings[k]=v; save(); applySettings(); fillSettings(); render();
+  });
+}
+$("s_reset").onclick = () => { S.settings={...DEFAULT_SETTINGS}; save(); applySettings(); fillSettings(); render(); toast("Settings reset"); };
+$("s_wipe").onclick = () => modal("Delete everything?", "Removes your details, every streak, history and settings from this browser. Export a backup first if you might want them back.", [
+  {text:"Cancel", cls:"ghost"},
+  {text:"Delete everything", cls:"danger", fn:()=>{ try{localStorage.removeItem(KEY);}catch(e){} S=blank(); loadMe(); applySettings(); render(); $("setModal").classList.remove("on"); toast("All data deleted"); }}
+]);
+matchMedia("(prefers-color-scheme: light)").addEventListener?.("change", applySettings);
+
+/* ---------- Init ---------- */
+load(); loadMe(); $("sort").value=S.sort; applySettings(); render();
+function checkPending(){
+  if (!S.pendingAsk) return;
+  const p = S.people.find(x=>x.id===S.pendingAsk); delete S.pendingAsk; save();
+  if (p) askSubmitted(p, "Welcome back. Did the ticket for "+display(p)+" go through?");
+}
+checkPending();
+window.addEventListener("pageshow", e=>{ if (e.persisted){ load(); checkPending(); } });
+if (S.me.user || S.me.email) checkMe(true);
+setInterval(render, 60000); // refresh cooldown timers
+</script>
+</body>
+</html>
